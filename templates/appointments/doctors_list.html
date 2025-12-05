@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="mb-4">Book an Appointment</h3>
+
+<form method="GET" class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <label class="form-label"><b>Select Doctor</b></label>
+        <select name="doctor_id" class="form-select" required onchange="this.form.submit()">
+            <option value="">-- Choose Doctor --</option>
+            {% for d in doctors %}
+                <option value="{{ d.id }}"
+                    {% if selected_doctor and selected_doctor.id == d.id %}
+                        selected
+                    {% endif %}
+                >
+                    Dr. {{ d.username }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label"><b>Select Date</b></label>
+        <select name="date" class="form-select"
+                {% if not selected_doctor %} disabled {% endif %}
+                onchange="this.form.submit()">
+
+            <option value="">-- Choose Date --</option>
+
+            {% for day in available_dates %}
+                <option value="{{ day|date:'Y-m-d' }}"
+                    {% if selected_date == day|date:'Y-m-d' %}
+                        selected
+                    {% endif %}
+                >
+                    {{ day|date:'Y-m-d' }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+
+</form>
+
+
+{% if slots %}
+<h4 class="mb-3">Available Slots</h4>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Time</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for slot in slots %}
+        <tr>
+            <td>{{ slot.start|date:"Y-m-d H:i" }} — {{ slot.end|time:"H:i" }}</td>
+            <td>
+                <a href="{% url 'appointments:book_slot' slot.id %}" 
+                   class="btn btn-success btn-sm">
+                    Book
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% elif selected_doctor and selected_date %}
+<div class="alert alert-warning">
+    No available slots for this date.
+</div>
+{% endif %}
+
+{% endblock %}

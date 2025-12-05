@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="mb-4">My Bookings</h3>
+
+{% if bookings %}
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            {% if request.user.profile.role == "doctor" %}
+                <th>Patient</th>
+            {% else %}
+                <th>Doctor</th>
+            {% endif %}
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            {% if request.user.profile.role == "patient" %}
+                <th>Action</th>
+            {% endif %}
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for b in bookings %}
+        <tr>
+            {% if request.user.profile.role == "doctor" %}
+                <td>{{ b.patient.username }}</td>
+            {% endif %}
+
+            {% if request.user.profile.role == "patient" %}
+                <td>{{ b.slot.doctor.username }}</td>
+            {% endif %}
+
+            <td>{{ b.slot.start|date:"Y-m-d" }}</td>
+
+            <td>
+                {{ b.slot.start|time:"H:i" }} - {{ b.slot.end|time:"H:i" }}
+            </td>
+
+            <td>
+                <span class="badge bg-success">Confirmed</span>
+            </td>
+
+            {% if request.user.profile.role == "patient" %}
+            <td>
+                <a href="{% url 'appointments:cancel_booking' b.id %}" 
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                    Cancel
+                </a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<p class="alert alert-info">No bookings found.</p>
+{% endif %}
+
+{% endblock %}
